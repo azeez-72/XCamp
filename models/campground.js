@@ -1,6 +1,7 @@
-const mongoose = require("mongoose");
-const Review = require("./review");
-const Schema = mongoose.Schema;
+import pkg from "mongoose";
+const { Schema: _Schema, model } = pkg;
+import Review from "./review.js";
+const Schema = _Schema;
 
 const CampgroundSchema = new Schema({
   title: String,
@@ -26,4 +27,4 @@ CampgroundSchema.post("findOneAndDelete", async function (doc) {
   }
 });
 
-module.exports = mongoose.model("Campground", CampgroundSchema);
+export default model("Campground", CampgroundSchema);

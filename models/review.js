@@ -1,9 +1,10 @@
-const mongoose = require("mongoose");
-const Schema = mongoose.Schema;
+import pkg from "mongoose";
+const { Schema: _Schema, model } = pkg;
+const Schema = _Schema;
 
 const reviewSchema = new Schema({
   body: String,
   rating: Number,
 });
 
-module.exports = mongoose.model("Review", reviewSchema);
+export default model("Review", reviewSchema);
