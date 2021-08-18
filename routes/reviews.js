@@ -4,6 +4,7 @@ import Campground from "../models/campground.js";
 import Review from "../models/review.js";
 import { reviewSchema } from "../schemas.js";
 import ExpressError from "../utils/ExpressError.js";
+import { isLoggedIn } from "../middleware.js";
 
 const router = Router({ mergeParams: true });
 
