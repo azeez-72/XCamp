@@ -1,21 +1,9 @@
 import { Router } from "express";
 import catchAsync from "../utils/catchAsync.js";
 import Campground from "../models/campground.js";
-import { campgroundSchema } from "../schemas.js";
-import ExpressError from "../utils/ExpressError.js";
-import { isLoggedIn } from "../middleware.js";
+import { isLoggedIn, validateCampground, isAuthor } from "../middleware.js";
 
 const router = Router();
-
-const validateCampground = (req, res, next) => {
-  const { error } = campgroundSchema.validate(req.body);
-  if (error) {
-    const msg = error.details.map((el) => el.message).join(",");
-    throw new ExpressError(msg, 400);
-  } else {
-    next();
-  }
-};
 
 router.get(
   "/",
@@ -31,11 +19,11 @@ router.get("/new", isLoggedIn, (req, res) => {
 
 router.post(
   "/",
-  validateCampground,
   isLoggedIn,
+  validateCampground,
   catchAsync(async (req, res, next) => {
-    // if (!req.body.campground) throw new ExpressError('Invalid Campground Data', 400);
     const campground = new Campground(req.body.campground);
+    campground.author = req.user._id;
     await campground.save();
     req.flash("success", "Successfully made a new campground!");
     res.redirect(`/campgrounds/${campground._id}`);
@@ -45,9 +33,15 @@ router.post(
 router.get(
   "/:id",
   catchAsync(async (req, res) => {
-    const campground = await Campground.findById(req.params.id).populate(
-      "reviews"
-    );
+    const campground = await Campground.findById(req.params.id)
+      .populate({
+        path: "reviews",
+        populate: {
+          path: "author",
+        },
+      })
+      .populate("author");
+    console.log(campground);
     if (!campground) {
       req.flash("error", "Cannot find that campground!");
       return res.redirect("/campgrounds");
@@ -59,8 +53,10 @@ router.get(
 router.get(
   "/:id/edit",
   isLoggedIn,
+  isAuthor,
   catchAsync(async (req, res) => {
-    const campground = await Campground.findById(req.params.id);
+    const { id } = req.params;
+    const campground = await Campground.findById(id);
     if (!campground) {
       req.flash("error", "Cannot find that campground!");
       return res.redirect("/campgrounds");
@@ -71,7 +67,8 @@ router.get(
 
 router.put(
   "/:id",
-  isLoggenIn,
+  isLoggedIn,
+  isAuthor,
   validateCampground,
   catchAsync(async (req, res) => {
     const { id } = req.params;
@@ -85,7 +82,8 @@ router.put(
 
 router.delete(
   "/:id",
-  isLoggenIn,
+  isLoggedIn,
+  isAuthor,
   catchAsync(async (req, res) => {
     const { id } = req.params;
     await Campground.findByIdAndDelete(id);
