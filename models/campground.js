@@ -2,10 +2,20 @@ import pkg from "mongoose";
 const { Schema: _Schema, model } = pkg;
 import Review from "./review.js";
 const Schema = _Schema;
+// import Image from "./image.js";
+
+const ImageSchema = new Schema({
+  url: String,
+  filename: String,
+});
+
+ImageSchema.virtual("thumbnail").get(function () {
+  return this.url.replace("/upload", "/upload/w_200");
+});
 
 const CampgroundSchema = new Schema({
   title: String,
-  image: String,
+  images: [ImageSchema],
   price: Number,
   description: String,
   location: String,

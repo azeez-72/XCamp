@@ -1,5 +1,8 @@
-import express, { urlencoded } from "express";
-import path from "path";
+import dotenv from "dotenv";
+dotenv.config({ silent: process.env.NODE_ENV === "production" });
+
+import express from "express";
+import path, { dirname } from "path";
 import Mongoose from "mongoose";
 import ExpressError from "./utils/ExpressError.js";
 import methodOverride from "method-override";
@@ -12,18 +15,21 @@ import flash from "connect-flash";
 import passport from "passport";
 import LocalStrategy from "passport-local";
 import User from "./models/user.js";
+import { fileURLToPath } from "url";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const app = express();
 
 connectMongoDB();
 
-// const __dirname = path.dirname(new URL(import.meta.url).pathname);
-
 app.engine("ejs", ejsMate);
 app.set("view engine", "ejs");
-app.set("views", "views");
+app.set("views", path.join(__dirname, "views"));
 
-app.use(urlencoded({ extended: true }));
+// app.use(serveFavicon(path.join(__dirname, "public", "favicon.ico")));
+
+app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride("_method"));
 // app.use(express.static(path.join(__dirname, "public")));
 app.use(express.static("public"));

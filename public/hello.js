@@ -1,0 +1,1 @@
+alert("PUBLIC DIRECTORY WORKS!");
